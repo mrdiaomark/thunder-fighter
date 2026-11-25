@@ -8,17 +8,20 @@
 <title>雷霆战机 · THUNDER FIGHTER</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+html,body{height:100%;width:100%;overflow:hidden;overscroll-behavior:none}
 body{
+  position:fixed;top:0;left:0;right:0;bottom:0;inset:0;
   background:radial-gradient(circle at 50% 8%,#0a1a34 0%,#050a16 48%,#000 100%);
   display:flex;align-items:center;justify-content:center;
   font-family:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
   color:#dff4ff;user-select:none;-webkit-user-select:none;
-  -webkit-tap-highlight-color:transparent;
+  -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
   touch-action:none;
 }
 .stage{
   position:relative;
+  width:60vh;height:100vh;                 /* 老浏览器兜底 */
   height:min(800px,100vh,calc(100vw / 0.6));
   height:min(800px,100dvh,calc(100vw / 0.6));
   width:calc(min(800px,100vh,calc(100vw / 0.6)) * 0.6);
@@ -31,9 +34,8 @@ body{
 @media (max-width:520px){ .stage{border-radius:0;box-shadow:none} }
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .scanlines{
-  position:absolute;inset:0;pointer-events:none;z-index:3;
-  background:repeating-linear-gradient(180deg,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,0) 1px 3px);
-  mix-blend-mode:overlay;
+  position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.55;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 1px,rgba(0,0,0,0) 1px 3px);
 }
 /* ================= HUD ================= */
 .hud{
@@ -92,11 +94,22 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;
   background:#12283f;border:1px solid rgba(255,190,90,.8);color:#ffd166;
   font-size:11px;font-weight:800;font-family:inherit}
+/* 首次触屏提示 */
+.drag-hint{
+  position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:4;
+  padding:7px 15px;border-radius:16px;white-space:nowrap;
+  font-size:12px;letter-spacing:1px;color:#bfeeff;pointer-events:none;
+  background:rgba(10,30,60,.62);border:1px solid rgba(120,215,255,.4);
+  box-shadow:0 0 16px rgba(60,170,255,.3);opacity:0;transition:opacity .4s;
+  animation:hintPulse 1.5s ease-in-out infinite;
+}
+.drag-hint.show{opacity:.95}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 12px rgba(60,170,255,.2)}50%{box-shadow:0 0 22px rgba(90,220,255,.55)}}
 /* ================= 遮罩 ================= */
 .overlay{
   position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:12px;padding:22px;text-align:center;
-  background:rgba(3,8,20,.84);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  background:radial-gradient(circle at 50% 42%,#0a1626 0%,#050a16 62%,#03060e 100%);
 }
 .overlay.hidden{display:none}
 .title{font-size:42px;font-weight:900;letter-spacing:7px;
@@ -163,6 +176,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     </div>
   </div>
 
+  <div class="drag-hint" id="dragHint">按住屏幕任意位置拖动</div>
+
   <div class="overlay" id="screenStart">
     <div class="title">雷霆战机</div>
     <div class="subtitle">THUNDER FIGHTER</div>
@@ -171,8 +186,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       手指按住屏幕拖动即可移动，<b>自动开火</b><br>
       右下角橙色按钮 <b>释放炸弹</b>，右上角 ❚❚ 暂停<br>
       吃 <b>P</b> 升火力（最高 Lv8 激光）· <b>S</b> 护盾 · <b>B</b> 加炸弹<br>
-      电脑：WASD / 方向键移动，鼠标拖拽，J 炸弹，P 暂停
-    </div>
+      电脑：WASD / 方向键移动，鼠标拖拽，J 炸弹，P 暂停    </div>
     <button class="btn" id="btnStart">开 始 游 戏</button>
   </div>
 
@@ -215,6 +229,15 @@ const canvas = document.getElementById('cv');
 const ctx = canvas.getContext('2d');
 
 function resize() {
+  // 由 JS 直接算尺寸，绕开各浏览器对 min()/dvh 支持不一致的问题
+  const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+  const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+  if (vw > 0 && vh > 0) {
+    const sh = Math.min(800, vh, vw / 0.6);
+    const sw = sh * 0.6;
+    stageEl.style.width = Math.round(sw) + 'px';
+    stageEl.style.height = Math.round(sh) + 'px';
+  }
   const rect = stageEl.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.round(rect.width * dpr);
@@ -226,6 +249,7 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 if (window.ResizeObserver) new ResizeObserver(resize).observe(stageEl);
 
 /* ============================================================
@@ -537,7 +561,7 @@ function updatePlayer(dt) {
 
   if (pointer.active) {
     const nx = clamp(pointer.x, 18, VW - 18);
-    const ny = clamp(pointer.y - 28, 60, VH - 30);
+    const ny = clamp(pointer.y - 55, 60, VH - 30);
     p.tilt += ((nx - p.x) * 0.05 - p.tilt) * Math.min(1, dt * 10);
     p.x += (nx - p.x) * Math.min(1, dt * 16);
     p.y += (ny - p.y) * Math.min(1, dt * 16);
@@ -1465,6 +1489,7 @@ function startGame() {
   G.state = 'playing';
   G.spawnTimer = 0.9;
   hideScreens();
+  showDragHint();
 }
 
 function gameOver() {
@@ -1512,46 +1537,71 @@ window.addEventListener('blur', () => {
   if (G.state === 'playing') togglePause();
 });
 
-function pointerPos(e) {
+/* ---- 触摸 / 鼠标拖拽 ---- */
+const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const dragHintEl = document.getElementById('dragHint');
+let hintTimer = 0;
+
+function pointerPosFromClient(cx, cy) {
   const r = canvas.getBoundingClientRect();
-  return {
-    x: ((e.clientX - r.left) / r.width) * VW,
-    y: ((e.clientY - r.top) / r.height) * VH,
-  };
+  if (!r.width || !r.height) return;
+  pointer.x = ((cx - r.left) / r.width) * VW;
+  pointer.y = ((cy - r.top) / r.height) * VH;
+}
+function isUIButton(t) {
+  return !!(t && t.closest && t.closest('button,.btn,.round-btn,.mini-btn'));
+}
+function hideDragHint() {
+  if (dragHintEl) dragHintEl.classList.remove('show');
+  clearTimeout(hintTimer);
+}
+function showDragHint() {
+  if (!hasTouch || !dragHintEl) return;
+  dragHintEl.classList.add('show');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => dragHintEl.classList.remove('show'), 4200);
+}
+function beginDrag(cx, cy) {
+  audioCtx();
+  if (G.state !== 'playing') return false;
+  pointer.active = true;
+  pointerPosFromClient(cx, cy);
+  hideDragHint();
+  return true;
+}
+function moveDrag(cx, cy) { if (pointer.active) pointerPosFromClient(cx, cy); }
+function endDrag() { pointer.active = false; }
+
+if (hasTouch) {
+  // 触屏：优先用 touch 事件（微信/QQ 等内置浏览器对 pointer 支持不全）
+  stageEl.addEventListener('touchstart', (e) => {
+    if (isUIButton(e.target) || e.touches.length !== 1) return;
+    if (beginDrag(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
+  }, { passive: false });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!pointer.active) return;
+    const t = e.touches[0];
+    if (!t) return;
+    moveDrag(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+
+  window.addEventListener('touchend', endDrag);
+  window.addEventListener('touchcancel', endDrag);
+} else {
+  stageEl.addEventListener('mousedown', (e) => {
+    if (isUIButton(e.target)) return;
+    if (beginDrag(e.clientX, e.clientY)) e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endDrag);
 }
 
-stageEl.addEventListener('pointerdown', (e) => {
-  if (e.target.closest && e.target.closest('button')) return;
-  audioCtx();
-  if (G.state !== 'playing') return;
-  pointer.active = true;
-  const p = pointerPos(e);
-  pointer.x = p.x; pointer.y = p.y;
-  if (stageEl.setPointerCapture) { try { stageEl.setPointerCapture(e.pointerId); } catch (_) {} }
-  e.preventDefault();
-}, { passive: false });
-
-stageEl.addEventListener('pointermove', (e) => {
-  if (!pointer.active) return;
-  const p = pointerPos(e);
-  pointer.x = p.x; pointer.y = p.y;
-  e.preventDefault();
-}, { passive: false });
-
-function endPointer() { pointer.active = false; }
-stageEl.addEventListener('pointerup', endPointer);
-stageEl.addEventListener('pointercancel', endPointer);
-stageEl.addEventListener('pointerleave', endPointer);
+// 屏蔽右键菜单与长按选择/缩放
 stageEl.addEventListener('contextmenu', (e) => e.preventDefault());
-
-// 触屏：阻止双指缩放 / 双击放大
+document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-let lastTap = 0;
-document.addEventListener('touchend', (e) => {
-  const now = Date.now();
-  if (now - lastTap < 300) e.preventDefault();
-  lastTap = now;
-}, { passive: false });
 
 /* ---- 按钮 ---- */
 document.getElementById('btnStart').addEventListener('click', startGame);
