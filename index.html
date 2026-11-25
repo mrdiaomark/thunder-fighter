@@ -535,23 +535,6 @@ function drawPlayer() {
   ctx.rotate(p.tilt * 0.5);
   if (blink) ctx.globalAlpha = 0.4;
 
-  // ---- 引擎尾焰 ----
-  const len = 14 + Math.sin(G.time * 42) * 5 + rnd(0, 4);
-  const flame = ctx.createLinearGradient(0, 8, 0, 8 + len);
-  flame.addColorStop(0, 'rgba(190,250,255,0.95)');
-  flame.addColorStop(0.35, 'rgba(90,200,255,0.8)');
-  flame.addColorStop(1, 'rgba(60,90,255,0)');
-  ctx.fillStyle = flame;
-  ctx.beginPath();
-  ctx.moveTo(-5, 9); ctx.lineTo(0, 9 + len); ctx.lineTo(5, 9);
-  ctx.closePath(); ctx.fill();
-
-  // 内焰
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.beginPath();
-  ctx.moveTo(-2.2, 9); ctx.lineTo(0, 9 + len * 0.5); ctx.lineTo(2.2, 9);
-  ctx.closePath(); ctx.fill();
-
   // ---- 机身 ----
   const body = ctx.createLinearGradient(0, -20, 0, 16);
   body.addColorStop(0, '#eafcff');
@@ -595,7 +578,35 @@ function drawPlayer() {
   ctx.ellipse(0, -5, 4.2, 8, 0, 0, TAU);
   ctx.fill();
 
-  // 护盾
+  // ---- 引擎尾焰（加色混合，画在机身之后）----
+  ctx.globalCompositeOperation = 'lighter';
+  const len = 26 + Math.sin(G.time * 42) * 8;
+  const flame = ctx.createLinearGradient(0, 6, 0, 6 + len);
+  flame.addColorStop(0, 'rgba(255,255,255,1)');
+  flame.addColorStop(0.22, 'rgba(150,240,255,0.95)');
+  flame.addColorStop(0.6, 'rgba(60,170,255,0.5)');
+  flame.addColorStop(1, 'rgba(20,60,255,0)');
+  ctx.fillStyle = flame;
+  ctx.beginPath();
+  ctx.moveTo(-7.5, 6); ctx.lineTo(0, 6 + len); ctx.lineTo(7.5, 6);
+  ctx.closePath(); ctx.fill();
+
+  // 两侧小喷口
+  ctx.fillStyle = 'rgba(120,220,255,0.55)';
+  for (const sx of [-11, 11]) {
+    ctx.beginPath();
+    ctx.moveTo(sx - 2.6, 8); ctx.lineTo(sx, 8 + len * 0.5); ctx.lineTo(sx + 2.6, 8);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // 内焰高光
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  ctx.moveTo(-2.8, 6); ctx.lineTo(0, 6 + len * 0.45); ctx.lineTo(2.8, 6);
+  ctx.closePath(); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // ---- 护盾 ----
   if (p.shield > 0) {
     const a = 0.35 + Math.sin(G.time * 8) * 0.15;
     ctx.strokeStyle = `rgba(110,255,220,${a})`;
@@ -764,12 +775,12 @@ function updateBoss(dt) {
 
   if (b.entering) {
     b.y += 130 * dt;
-    if (b.y >= 150) { b.y = 150; b.entering = false; b.attackT = 0.9; }
+    if (b.y >= 215) { b.y = 215; b.entering = false; b.attackT = 0.9; }
     return;
   }
 
   b.x = VW / 2 + Math.sin(b.t * 0.72) * 132;
-  b.y = 152 + Math.sin(b.t * 1.7) * 12;
+  b.y = 217 + Math.sin(b.t * 1.7) * 12;
 
   const ratio = b.hp / b.maxHp;
   b.phase = ratio > 0.62 ? 1 : (ratio > 0.3 ? 2 : 3);
@@ -866,8 +877,9 @@ function drawBoss() {
 
   ctx.restore();
 
-  // ---- 顶部血条 ----
-  const barW = 300, barH = 9, barX = (VW - barW) / 2, barY = 58;
+  // ---- 顶部血条（入场动画结束后才显示）----
+  if (b.entering) return;
+  const barW = 300, barH = 9, barX = (VW - barW) / 2, barY = 112;
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
   const hpGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
