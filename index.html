@@ -128,6 +128,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   box-shadow:0 0 18px rgba(60,170,255,.45),inset 0 0 20px rgba(60,170,255,.25)}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:transparent;border-color:rgba(120,190,230,.4);box-shadow:none;font-size:13px;padding:9px 24px}
+.online-link{font-size:11.5px;color:#7fc4e0;text-decoration:none;opacity:.8;
+  border-bottom:1px dashed rgba(120,200,240,.5);padding-bottom:2px}
+.online-link:active{opacity:1}
 .over-score{display:flex;gap:30px;margin:2px 0}
 .over-score div{display:flex;flex-direction:column;gap:4px}
 .over-score span{font-size:11px;letter-spacing:3px;color:#6fb6d8}
@@ -195,6 +198,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       吃 <b>P</b> 升火力（最高 Lv8 激光）· <b>S</b> 护盾 · <b>B</b> 加炸弹<br>
       电脑：WASD / 方向键移动，鼠标拖拽，J 炸弹，P 暂停    </div>
     <button class="btn" id="btnStart">开 始 游 戏</button>
+    <a class="online-link" href="https://mrdiaomark.github.io/thunder-fighter/" target="_blank">
+      点不动？用在线版直接玩 ›
+    </a>
   </div>
 
   <div class="overlay hidden" id="screenPause">
@@ -216,18 +222,24 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 
 <div class="js-fallback hidden" id="jsFallback">
   <b>游戏脚本没能启动</b><br>
-  请点右上角「···」→「在浏览器打开」，或直接访问<br>
-  https://mrdiaomark.github.io/thunder-fighter/
+  点下面的按钮直接在线玩，或点右上角「···」→「在浏览器打开」<br>
+  <a href="https://mrdiaomark.github.io/thunder-fighter/" target="_blank"
+     style="display:inline-block;margin-top:8px;padding:8px 18px;border-radius:8px;background:#1d6fd4;
+     color:#eaf7ff;text-decoration:none;font-weight:700">▶ 在线开战</a>
 </div>
 
 <noscript>
-  <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;display:flex;align-items:center;
-    justify-content:center;padding:26px;background:#050a16;color:#bfeeff;font-family:sans-serif;
-    text-align:center;line-height:2;font-size:14px">
-    这个页面需要运行 JavaScript。<br>
-    微信里直接点开文件时可能不执行脚本：<br>
-    请点右上角「···」→「在浏览器打开」，<br>
-    或直接访问 https://mrdiaomark.github.io/thunder-fighter/
+  <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:26px;background:#050a16;color:#bfeeff;
+    font-family:sans-serif;text-align:center;line-height:2;font-size:14px">
+    <div style="font-size:22px;font-weight:800;letter-spacing:4px;color:#8fe8ff">雷 霆 战 机</div>
+    <div style="margin-top:10px">这个页面需要运行 JavaScript，微信的「文件预览」里常常被禁用。</div>
+    <a href="https://mrdiaomark.github.io/thunder-fighter/"
+       style="display:inline-block;margin-top:18px;padding:14px 34px;border-radius:10px;
+       background:#1d6fd4;color:#eaf7ff;text-decoration:none;font-weight:800;letter-spacing:2px;font-size:16px">
+      ▶ 在线开战（无需下载）
+    </a>
+    <div style="margin-top:16px;opacity:.75">也可以在微信里点右上角「···」→「在浏览器打开」</div>
   </div>
 </noscript>
 
@@ -1067,163 +1079,342 @@ function drawEnemyByType(e, flash) {
 
   /* ---------------- 虫族 ---------------- */
   } else if (e.type === 'bug') {
-    // 翼虫：膜翅 + 分节甲壳 + 红瞳 + 尾刺
+    // 翼虫：半透明膜翅 + 珠光甲壳 + 复眼反光
     const flap = Math.sin(e.t * 24 + e.phase);
     for (const sx of [-1, 1]) {
-      const lean = 0.5 + flap * 0.35;
-      ctx.fillStyle = 'rgba(150,90,220,0.34)';
+      const lean = 0.5 + flap * 0.32;
+      const wg = ctx.createLinearGradient(0, -12, sx * 34, 12);
+      wg.addColorStop(0, 'rgba(214,230,255,0.5)');
+      wg.addColorStop(0.55, 'rgba(150,120,225,0.26)');
+      wg.addColorStop(1, 'rgba(110,80,200,0.04)');
+      ctx.fillStyle = wg;
       ctx.beginPath();
-      ctx.moveTo(sx * 3, -6);
-      ctx.quadraticCurveTo(sx * 26, -18 - lean * 8, sx * 34, 3 + lean * 6);
-      ctx.quadraticCurveTo(sx * 20, 5, sx * 3, -1);
+      ctx.moveTo(sx * 3, -8);
+      ctx.quadraticCurveTo(sx * 30, -21 - lean * 8, sx * 38, 1 + lean * 6);
+      ctx.quadraticCurveTo(sx * 22, 5, sx * 3, -2);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(205,150,255,0.45)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      ctx.fillStyle = 'rgba(150,90,220,0.22)';
-      ctx.beginPath();
-      ctx.moveTo(sx * 3, 2);
-      ctx.quadraticCurveTo(sx * 22, 11 + lean * 8, sx * 27, 24 + lean * 4);
-      ctx.quadraticCurveTo(sx * 12, 17, sx * 3, 10);
-      ctx.closePath(); ctx.fill();
-    }
-    ctx.fillStyle = g('#ff9ecb', '#a52dff', '#26083c');
-    ctx.beginPath(); ctx.ellipse(0, 0, 8, 17, 0, 0, TAU); ctx.fill();
-    ctx.strokeStyle = 'rgba(35,0,55,0.7)';
-    ctx.lineWidth = 1.2;
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath(); ctx.ellipse(0, -6 + i * 6, 7 - i * 1.6, 2, 0, 0, TAU); ctx.stroke();
-    }
-    ctx.fillStyle = '#ff2d5e';
-    ctx.beginPath(); ctx.arc(-3.4, 12, 2.3, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(3.4, 12, 2.3, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#ff5c7a';
-    ctx.beginPath(); ctx.moveTo(0, 17); ctx.lineTo(2.6, 24); ctx.lineTo(-2.6, 24); ctx.closePath(); ctx.fill();
-
-  } else if (e.type === 'spitter') {
-    // 酸液虫：鼓胀毒囊 + 口器
-    const pulse = 0.5 + Math.sin(e.t * 5) * 0.5;
-    ctx.strokeStyle = 'rgba(120,200,90,0.8)';
-    ctx.lineWidth = 2.4;
-    for (const sx of [-1, 1]) {
-      for (let i = 0; i < 2; i++) {
+      ctx.strokeStyle = 'rgba(225,210,255,0.5)';
+      ctx.lineWidth = 0.9; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 0.7;
+      for (let v = 1; v <= 3; v++) {
         ctx.beginPath();
-        ctx.moveTo(sx * 6, -4 + i * 9);
-        ctx.quadraticCurveTo(sx * 20, -2 + i * 12, sx * 16, 14 + i * 8);
+        ctx.moveTo(sx * 4, -5);
+        ctx.lineTo(sx * (12 + v * 7), -7 + v * 5 + lean * 3);
         ctx.stroke();
       }
+      ctx.fillStyle = 'rgba(140,110,210,0.18)';
+      ctx.beginPath();
+      ctx.moveTo(sx * 3, 0);
+      ctx.quadraticCurveTo(sx * 24, 12 + lean * 8, sx * 28, 26 + lean * 4);
+      ctx.quadraticCurveTo(sx * 12, 18, sx * 3, 8);
+      ctx.closePath(); ctx.fill();
     }
-    ctx.fillStyle = g('#c8ff9a', '#5fc23a', '#123a10');
-    ctx.beginPath(); ctx.ellipse(0, 0, 14, 16, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = `rgba(180,255,110,${0.5 + pulse * 0.45})`;
-    ctx.beginPath(); ctx.arc(0, -2, 8 + pulse * 1.8, 0, TAU); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.beginPath(); ctx.arc(-4, -5, 2.2, 0, TAU); ctx.fill();
-    ctx.strokeStyle = '#e8ffb0';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(0, 12, 6.5, 0.25, Math.PI - 0.25); ctx.stroke();
+    // 腹部（珠光横向渐变）
+    const ab = ctx.createLinearGradient(-9, 0, 9, 0);
+    ab.addColorStop(0, '#0d0618');
+    ab.addColorStop(0.35, '#5b2585');
+    ab.addColorStop(0.55, '#b884e0');
+    ab.addColorStop(0.75, '#5a2480');
+    ab.addColorStop(1, '#100720');
+    ctx.fillStyle = ab;
+    ctx.beginPath(); ctx.ellipse(0, -3, 8.6, 16.2, 0, 0, TAU); ctx.fill();
+    // 节缝
+    ctx.strokeStyle = 'rgba(18,4,30,0.85)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.ellipse(0, -11 + i * 6, 7.8 - i * 1.1, 2.2, 0, 0.3, Math.PI - 0.3);
+      ctx.stroke();
+    }
+    // 反光条
+    ctx.fillStyle = 'rgba(240,235,255,0.3)';
+    ctx.beginPath(); ctx.ellipse(-3.4, -6, 2, 8, -0.25, 0, TAU); ctx.fill();
+    // 头
+    ctx.fillStyle = '#1d0c2e';
+    ctx.beginPath(); ctx.ellipse(0, 13, 6.4, 5.4, 0, 0, TAU); ctx.fill();
+    // 复眼
+    for (const sx of [-1, 1]) {
+      const eg = ctx.createLinearGradient(sx * 2, 9, sx * 6, 15);
+      eg.addColorStop(0, '#ff9db4'); eg.addColorStop(0.5, '#e01545'); eg.addColorStop(1, '#3d0010');
+      ctx.fillStyle = eg;
+      ctx.beginPath(); ctx.ellipse(sx * 3.7, 12, 2.8, 3.4, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.beginPath(); ctx.arc(sx * 3.1, 10.8, 0.9, 0, TAU); ctx.fill();
+    }
+    // 触角
+    ctx.strokeStyle = 'rgba(215,185,255,0.55)';
+    ctx.lineWidth = 1;
+    for (const sx of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(sx * 4, 17);
+      ctx.quadraticCurveTo(sx * 10, 22, sx * 7, 27 + flap * 1.5);
+      ctx.stroke();
+    }
+
+  } else if (e.type === 'spitter') {
+    // 酸液虫：湿润皮肤 + 斑纹 + 口器齿
+    const pulse = 0.5 + Math.sin(e.t * 5) * 0.5;
+    ctx.lineWidth = 3;
+    for (const sx of [-1, 1]) {
+      for (let i = 0; i < 2; i++) {
+        ctx.strokeStyle = '#1b2b10';
+        ctx.beginPath();
+        ctx.moveTo(sx * 8, -6 + i * 10);
+        ctx.quadraticCurveTo(sx * 24, -2 + i * 12, sx * 19, 16 + i * 8);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(150,210,90,0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx * 9, -7 + i * 10);
+        ctx.quadraticCurveTo(sx * 23, -3 + i * 12, sx * 18, 14 + i * 8);
+        ctx.stroke();
+        ctx.lineWidth = 3;
+      }
+    }
+    const bg = ctx.createRadialGradient(-4, -6, 2, 0, 2, 20);
+    bg.addColorStop(0, '#a8d860');
+    bg.addColorStop(0.4, '#5e9433');
+    bg.addColorStop(0.78, '#27400f');
+    bg.addColorStop(1, '#0b1405');
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, 0, 15, 17.5, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(12,30,6,0.55)';
+    for (const [mx, my, mr] of [[-8, -7, 3.2], [7, -9, 2.4], [-3, 8, 2.8], [9, 4, 2.2], [-10, 5, 2]]) {
+      ctx.beginPath(); ctx.ellipse(mx, my, mr * 1.2, mr, 0.4, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(230,255,190,0.22)';
+    ctx.beginPath(); ctx.ellipse(-5, -8, 4.6, 6, -0.5, 0, TAU); ctx.fill();
+    const sg = ctx.createRadialGradient(0, -3, 1, 0, -3, 12);
+    sg.addColorStop(0, 'rgba(248,255,220,0.9)');
+    sg.addColorStop(0.45, `rgba(180,255,90,${0.32 + pulse * 0.3})`);
+    sg.addColorStop(1, 'rgba(110,190,40,0)');
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.arc(0, -3, 11 + pulse * 2, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#0d1806';
+    ctx.beginPath(); ctx.ellipse(0, 13, 7, 4.6, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#dcffa0';
+    ctx.lineWidth = 1.3;
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath(); ctx.moveTo(i * 2.8, 10); ctx.lineTo(i * 3.4, 16.4); ctx.stroke();
+    }
 
   } else if (e.type === 'beetle') {
-    // 装甲甲虫（精英）
+    // 装甲甲虫（精英）：金属甲壳 + 高光弧 + 熔岩裂缝
     const p2 = 0.5 + Math.sin(e.t * 6) * 0.5;
-    ctx.fillStyle = g('#ffd08a', '#c9622a', '#2a0d05');
-    ctx.beginPath();
-    ctx.moveTo(0, -30); ctx.lineTo(20, -18); ctx.lineTo(27, 2); ctx.lineTo(18, 22);
-    ctx.lineTo(0, 30); ctx.lineTo(-18, 22); ctx.lineTo(-27, 2); ctx.lineTo(-20, -18);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = 'rgba(60,20,0,0.7)';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(0, -26); ctx.lineTo(0, 26); ctx.stroke();
-    for (let i = -1; i <= 1; i++) {
-      ctx.beginPath(); ctx.ellipse(0, i * 12, 22 - Math.abs(i) * 5, 4, 0, 0, TAU); ctx.stroke();
-    }
-    // 前肢大螯
-    ctx.fillStyle = '#7a3a12';
+    ctx.lineWidth = 3.4;
     for (const sx of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        ctx.strokeStyle = '#170d06';
+        ctx.beginPath();
+        ctx.moveTo(sx * 15, -16 + i * 15);
+        ctx.quadraticCurveTo(sx * 38, -20 + i * 17, sx * 31, 8 + i * 12);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(210,150,80,0.3)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(sx * 16, -17 + i * 15);
+        ctx.quadraticCurveTo(sx * 36, -21 + i * 17, sx * 30, 6 + i * 12);
+        ctx.stroke();
+        ctx.lineWidth = 3.4;
+      }
+    }
+    const cg = ctx.createLinearGradient(0, -34, 0, 32);
+    cg.addColorStop(0, flash ? '#ffffff' : '#33200f');
+    cg.addColorStop(0.22, flash ? '#ffe2bd' : '#8a5522');
+    cg.addColorStop(0.45, '#d29a4a');
+    cg.addColorStop(0.62, '#8a5726');
+    cg.addColorStop(0.85, '#3a2110');
+    cg.addColorStop(1, '#150b05');
+    ctx.fillStyle = cg;
+    ctx.beginPath();
+    ctx.moveTo(0, -35); ctx.lineTo(25, -23); ctx.lineTo(32, 1); ctx.lineTo(23, 25);
+    ctx.lineTo(0, 33); ctx.lineTo(-23, 25); ctx.lineTo(-32, 1); ctx.lineTo(-25, -23);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,238,200,0.3)';
+    ctx.beginPath(); ctx.ellipse(-7, -17, 12, 6.5, -0.45, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(28,14,5,0.85)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(0, -31); ctx.lineTo(0, 29); ctx.stroke();
+    ctx.lineWidth = 1.3;
+    for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
-      ctx.moveTo(sx * 16, 12); ctx.lineTo(sx * 32, 26); ctx.lineTo(sx * 20, 30);
+      ctx.moveTo(-23, i * 13); ctx.quadraticCurveTo(0, i * 13 - 5, 23, i * 13);
+      ctx.stroke();
+    }
+    // 边缘尖刺
+    ctx.fillStyle = '#1d1108';
+    for (let i = 0; i < 6; i++) {
+      const a = -2.4 + i * 0.55;
+      const px = Math.cos(a) * 29, py = Math.sin(a) * 31;
+      ctx.beginPath();
+      ctx.moveTo(px - 3, py - 1.5);
+      ctx.lineTo(px + Math.cos(a) * 11, py + Math.sin(a) * 11);
+      ctx.lineTo(px + 3, py + 2);
       ctx.closePath(); ctx.fill();
     }
-    ctx.strokeStyle = `rgba(255,120,60,${0.45 + p2 * 0.55})`;
+    ctx.strokeStyle = `rgba(255,140,50,${0.4 + p2 * 0.55})`;
     ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(-14, 2); ctx.lineTo(-6, 8); ctx.lineTo(-10, 16); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(14, 2); ctx.lineTo(6, 8); ctx.lineTo(10, 16); ctx.stroke();
-    ctx.fillStyle = '#ffde5c';
-    ctx.beginPath(); ctx.arc(-8, -20, 3.4, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(8, -20, 3.4, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-12, -5); ctx.lineTo(-5, 1); ctx.lineTo(-10, 9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(12, -5); ctx.lineTo(5, 1); ctx.lineTo(10, 9); ctx.stroke();
+    // 头 + 上颚
+    ctx.fillStyle = '#241408';
+    ctx.beginPath(); ctx.ellipse(0, 31, 12.5, 8.5, 0, 0, TAU); ctx.fill();
+    const mg = ctx.createLinearGradient(-24, 34, 24, 46);
+    mg.addColorStop(0, '#2a1608'); mg.addColorStop(0.5, '#6d4520'); mg.addColorStop(1, '#1d1006');
+    for (const sx of [-1, 1]) {
+      ctx.fillStyle = mg;
+      ctx.beginPath();
+      ctx.moveTo(sx * 9, 32);
+      ctx.quadraticCurveTo(sx * 32, 38, sx * 24, 47);
+      ctx.quadraticCurveTo(sx * 15, 40, sx * 4, 36);
+      ctx.closePath(); ctx.fill();
+    }
+    for (const sx of [-1, 1]) {
+      const eg = ctx.createLinearGradient(sx * 4, 24, sx * 11, 30);
+      eg.addColorStop(0, '#fff3bc'); eg.addColorStop(0.5, '#ffab24'); eg.addColorStop(1, '#4d2100');
+      ctx.fillStyle = eg;
+      ctx.beginPath(); ctx.arc(sx * 8, 26, 3.4, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.beginPath(); ctx.arc(sx * 7, 24.8, 1, 0, TAU); ctx.fill();
+    }
 
   } else if (e.type === 'wasp') {
-    // 毒刺蜂（精英）
+    // 毒刺蜂（精英）：膜翅脉络 + 警戒条纹 + 发光毒刺
     const flap = Math.sin(e.t * 26 + e.phase);
-    ctx.fillStyle = 'rgba(255,120,220,0.32)';
     for (const sx of [-1, 1]) {
+      const wg = ctx.createLinearGradient(0, -24, sx * 36, 10);
+      wg.addColorStop(0, 'rgba(255,255,255,0.42)');
+      wg.addColorStop(0.5, 'rgba(255,205,240,0.2)');
+      wg.addColorStop(1, 'rgba(170,120,220,0.04)');
+      ctx.fillStyle = wg;
       ctx.beginPath();
       ctx.moveTo(0, -6);
-      ctx.quadraticCurveTo(sx * 30, -18 + flap * 8, sx * 34, 6 + flap * 6);
+      ctx.quadraticCurveTo(sx * 32, -24 + flap * 8, sx * 37, 7 + flap * 5);
       ctx.quadraticCurveTo(sx * 18, 4, 0, 2);
       ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,235,250,0.3)';
+      ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.lineWidth = 0.7;
+      for (let v = 1; v <= 3; v++) {
+        ctx.beginPath(); ctx.moveTo(sx * 2, -4); ctx.lineTo(sx * (13 + v * 6), -11 + v * 6 + flap * 3); ctx.stroke();
+      }
     }
-    ctx.fillStyle = g('#ffd1f4', '#ff4fc2', '#49063a');
-    ctx.beginPath(); ctx.ellipse(0, -6, 9, 14, 0, 0, TAU); ctx.fill();
-    ctx.strokeStyle = 'rgba(60,0,40,0.7)';
-    ctx.lineWidth = 1.6;
+    const abw = ctx.createLinearGradient(-9.5, 0, 9.5, 0);
+    abw.addColorStop(0, '#1a0018'); abw.addColorStop(0.4, '#ff4fbf');
+    abw.addColorStop(0.6, '#ff9ad9'); abw.addColorStop(1, '#22001c');
+    ctx.fillStyle = abw;
+    ctx.beginPath(); ctx.ellipse(0, -8, 9.6, 15.5, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(16,0,16,0.82)';
     for (let i = 0; i < 3; i++) {
-      ctx.beginPath(); ctx.ellipse(0, -12 + i * 6, 8, 2, 0, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, -16 + i * 7.4, 9.4 - i * 0.5, 2.3, 0, 0, TAU); ctx.fill();
     }
-    ctx.fillStyle = '#ff8ad8';
-    ctx.beginPath(); ctx.arc(0, 10, 7, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#e6ff7a';
-    ctx.beginPath(); ctx.moveTo(0, 17); ctx.lineTo(3.2, 28); ctx.lineTo(-3.2, 28); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#2a0030';
-    ctx.beginPath(); ctx.arc(-3, 8, 2, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(3, 8, 2, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.26)';
+    ctx.beginPath(); ctx.ellipse(-3.4, -12, 2.6, 8, -0.3, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#26082a';
+    ctx.beginPath(); ctx.ellipse(0, 9, 7.2, 6.6, 0, 0, TAU); ctx.fill();
+    const stg = ctx.createLinearGradient(0, 16, 0, 29);
+    stg.addColorStop(0, '#e8ff8c'); stg.addColorStop(1, '#7aa800');
+    ctx.fillStyle = stg;
+    ctx.beginPath(); ctx.moveTo(0, 16); ctx.lineTo(3, 28); ctx.lineTo(-3, 28); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = `rgba(210,255,120,${0.3 + Math.sin(G.time * 6) * 0.25})`;
+    ctx.beginPath(); ctx.arc(0, 27, 4.5, 0, TAU); ctx.fill();
+    for (const sx of [-1, 1]) {
+      const eg = ctx.createLinearGradient(sx * 1, 5, sx * 5, 10);
+      eg.addColorStop(0, '#f2ffe0'); eg.addColorStop(0.5, '#8cff4a'); eg.addColorStop(1, '#123a00');
+      ctx.fillStyle = eg;
+      ctx.beginPath(); ctx.ellipse(sx * 3, 7, 2.7, 3.2, 0, 0, TAU); ctx.fill();
+    }
 
   /* ---------------- 机械生命体 ---------------- */
   } else if (e.type === 'soldier') {
-    // 人形机甲小兵
+    // 人形机甲小兵：金属面板 + 面罩红光 + 推进器
     const bob = Math.sin(e.t * 3) * 1.5;
-    ctx.fillStyle = 'rgba(120,220,255,0.8)';
-    ctx.beginPath(); ctx.ellipse(-9, -16 - bob, 3.4, 6, 0, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(9, -16 - bob, 3.4, 6, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = g('#dff3ff', '#7aa7c9', '#0d2333');
-    ctx.beginPath(); ctx.roundRect(-8, -10, 16, 21, 5); ctx.fill();
-    ctx.fillStyle = flash ? '#ffffff' : '#9fc6e0';
-    ctx.beginPath(); ctx.roundRect(-15, -10, 7, 12, 3); ctx.fill();
-    ctx.beginPath(); ctx.roundRect(8, -10, 7, 12, 3); ctx.fill();
-    ctx.fillStyle = '#c9e8ff';
-    ctx.beginPath(); ctx.roundRect(-5, 11, 10, 9, 3); ctx.fill();
-    ctx.fillStyle = '#ff3d5c';
-    ctx.beginPath(); ctx.roundRect(-3.6, 13.5, 7.2, 2.6, 1); ctx.fill();
-    ctx.fillStyle = '#3d5a70';
-    ctx.beginPath(); ctx.roundRect(-11, 18, 22, 4, 2); ctx.fill();
-    ctx.fillStyle = 'rgba(120,230,255,0.95)';
-    ctx.beginPath(); ctx.arc(0, 1, 3, 0, TAU); ctx.fill();
+    for (const sx of [-1, 1]) {
+      const tg = ctx.createRadialGradient(sx * 9, -18 - bob, 1, sx * 9, -18 - bob, 10);
+      tg.addColorStop(0, 'rgba(225,250,255,0.85)');
+      tg.addColorStop(0.45, 'rgba(80,185,255,0.45)');
+      tg.addColorStop(1, 'rgba(50,110,255,0)');
+      ctx.fillStyle = tg;
+      ctx.beginPath(); ctx.arc(sx * 9, -18 - bob, 10, 0, TAU); ctx.fill();
+    }
+    const mg = ctx.createLinearGradient(-9, 0, 9, 0);
+    mg.addColorStop(0, '#15232c'); mg.addColorStop(0.3, '#7f9fb3');
+    mg.addColorStop(0.52, '#dbeaf5'); mg.addColorStop(0.75, '#6f8b9e'); mg.addColorStop(1, '#182732');
+    ctx.fillStyle = flash ? '#ffffff' : mg;
+    ctx.beginPath(); ctx.roundRect(-8.5, -11, 17, 22, 4); ctx.fill();
+    ctx.strokeStyle = 'rgba(12,24,32,0.7)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-8, -2); ctx.lineTo(8, -2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.stroke();
+    for (const sx of [-1, 1]) {
+      ctx.fillStyle = '#4a6577';
+      ctx.beginPath(); ctx.roundRect(sx * 12 - 4.5, -11, 8, 12, 3); ctx.fill();
+      ctx.fillStyle = 'rgba(230,245,255,0.4)';
+      ctx.beginPath(); ctx.roundRect(sx * 12 - 4.5, -11, 8, 3, 2); ctx.fill();
+    }
+    ctx.fillStyle = '#9fb8c9';
+    ctx.beginPath(); ctx.roundRect(-5.5, 11, 11, 10, 3); ctx.fill();
+    ctx.fillStyle = '#08131c';
+    ctx.beginPath(); ctx.roundRect(-4.2, 13, 8.4, 4.4, 1.6); ctx.fill();
+    ctx.fillStyle = `rgba(255,55,85,${0.55 + Math.sin(G.time * 5) * 0.35})`;
+    ctx.beginPath(); ctx.roundRect(-3, 14.2, 6, 2, 1); ctx.fill();
+    ctx.fillStyle = '#22303a';
+    ctx.beginPath(); ctx.roundRect(-12, 19, 24, 4.4, 2); ctx.fill();
+    ctx.fillStyle = 'rgba(190,225,255,0.45)';
+    ctx.beginPath(); ctx.roundRect(-5, 19.8, 11, 1.4, 0.7); ctx.fill();
+    ctx.fillStyle = `rgba(120,235,255,${0.55 + Math.sin(G.time * 8) * 0.3})`;
+    ctx.beginPath(); ctx.arc(0, 1.5, 3.2, 0, TAU); ctx.fill();
 
   } else if (e.type === 'heavy') {
-    // 重装武装机甲（精英）
-    ctx.fillStyle = 'rgba(120,200,255,0.5)';
+    // 重装武装机甲（精英）：厚重装甲 + 双肩炮 + 反应堆
     for (const sx of [-1, 1]) {
-      ctx.beginPath(); ctx.ellipse(sx * 16, -27, 4, 9 + Math.random() * 4, 0, 0, TAU); ctx.fill();
+      const tg = ctx.createRadialGradient(sx * 17, -29, 2, sx * 17, -29, 17);
+      tg.addColorStop(0, 'rgba(232,250,255,0.85)');
+      tg.addColorStop(0.4, 'rgba(90,190,255,0.4)');
+      tg.addColorStop(1, 'rgba(50,110,255,0)');
+      ctx.fillStyle = tg;
+      ctx.beginPath(); ctx.ellipse(sx * 17, -29, 7.5, 17 + Math.random() * 4, 0, 0, TAU); ctx.fill();
     }
-    ctx.fillStyle = g('#e8f4ff', '#5f7f96', '#08131c');
-    ctx.beginPath(); ctx.roundRect(-22, -16, 44, 34, 8); ctx.fill();
-    ctx.strokeStyle = 'rgba(20,40,55,0.8)';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.roundRect(-15, -8, 30, 14, 4); ctx.stroke();
-    // 双肩炮
+    const hg = ctx.createLinearGradient(-24, -18, 24, 20);
+    hg.addColorStop(0, '#101c25'); hg.addColorStop(0.28, '#7794a7');
+    hg.addColorStop(0.5, '#d9eaf6'); hg.addColorStop(0.74, '#5b7688'); hg.addColorStop(1, '#0c171e');
+    ctx.fillStyle = flash ? '#ffffff' : hg;
+    ctx.beginPath(); ctx.roundRect(-23, -17, 46, 36, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(9,20,28,0.8)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-23, -4); ctx.lineTo(23, -4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-16, -17); ctx.lineTo(-16, 19); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16, -17); ctx.lineTo(16, 19); ctx.stroke();
+    ctx.fillStyle = 'rgba(18,30,38,0.55)';
+    for (const rx of [-19, -12, 12, 19]) {
+      for (const ry of [-12, 14]) { ctx.beginPath(); ctx.arc(rx, ry, 1.2, 0, TAU); ctx.fill(); }
+    }
     for (const sx of [-1, 1]) {
-      ctx.fillStyle = '#2b3d4d';
-      ctx.beginPath(); ctx.roundRect(sx * 18 - 5, -22, 10, 22, 3); ctx.fill();
-      ctx.fillStyle = '#ffb04d';
-      ctx.beginPath(); ctx.roundRect(sx * 18 - 2, -26, 4, 6, 2); ctx.fill();
+      ctx.fillStyle = '#15222b';
+      ctx.beginPath(); ctx.roundRect(sx * 18 - 6, -26, 12, 24, 3); ctx.fill();
+      ctx.fillStyle = 'rgba(205,235,255,0.25)';
+      ctx.beginPath(); ctx.roundRect(sx * 18 - 4.8, -25, 2.6, 22, 2); ctx.fill();
+      ctx.fillStyle = '#ff9a3d';
+      ctx.beginPath(); ctx.roundRect(sx * 18 - 2.4, -30, 4.8, 6, 2); ctx.fill();
+      ctx.fillStyle = `rgba(255,220,150,${0.45 + Math.sin(G.time * 10 + sx) * 0.3})`;
+      ctx.beginPath(); ctx.arc(sx * 18, -29, 4.6, 0, TAU); ctx.fill();
     }
-    ctx.fillStyle = '#cfe6f5';
-    ctx.beginPath(); ctx.roundRect(-7, 16, 14, 11, 4); ctx.fill();
-    ctx.fillStyle = '#ff2d5e';
-    ctx.beginPath(); ctx.roundRect(-5, 19, 10, 3, 1.5); ctx.fill();
-    ctx.fillStyle = `rgba(120,240,255,${0.55 + Math.sin(G.time * 8) * 0.35})`;
-    ctx.beginPath(); ctx.arc(0, 0, 6, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#33495a';
+    ctx.beginPath(); ctx.roundRect(-11, -6, 22, 16, 3); ctx.fill();
+    const coreg = ctx.createRadialGradient(0, 2, 1, 0, 2, 9);
+    coreg.addColorStop(0, '#ffffff');
+    coreg.addColorStop(0.45, 'rgba(120,240,255,0.8)');
+    coreg.addColorStop(1, 'rgba(30,120,220,0.08)');
+    ctx.fillStyle = coreg;
+    ctx.beginPath(); ctx.arc(0, 2, 7.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#9fbccd';
+    ctx.beginPath(); ctx.roundRect(-8, 17, 16, 12, 4); ctx.fill();
+    ctx.fillStyle = '#08131c';
+    ctx.beginPath(); ctx.roundRect(-6, 20, 12, 4.4, 2); ctx.fill();
+    ctx.fillStyle = `rgba(255,50,90,${0.6 + Math.sin(G.time * 6) * 0.3})`;
+    ctx.beginPath(); ctx.roundRect(-4.6, 21, 9, 2.2, 1); ctx.fill();
   }
 }
 
@@ -2166,31 +2357,38 @@ function beginDrag(cx, cy) {
 function moveDrag(cx, cy) { if (pointer.active) pointerPosFromClient(cx, cy); }
 function endDrag() { pointer.active = false; }
 
-if (hasTouch) {
-  // 触屏：优先用 touch 事件（微信/QQ 等内置浏览器对 pointer 支持不全）
-  stageEl.addEventListener('touchstart', (e) => {
-    if (isUIButton(e.target) || e.touches.length !== 1) return;
-    if (beginDrag(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
-  }, { passive: false });
+/* 触摸和鼠标两套都绑上：带触摸屏的笔记本/一体机也能用鼠标拖，
+   触摸后浏览器会补发合成鼠标事件，用一个时间戳挡掉避免打架 */
+let lastTouchAt = 0;
 
-  window.addEventListener('touchmove', (e) => {
-    if (!pointer.active) return;
-    const t = e.touches[0];
-    if (!t) return;
-    moveDrag(t.clientX, t.clientY);
-    e.preventDefault();
-  }, { passive: false });
+stageEl.addEventListener('touchstart', (e) => {
+  lastTouchAt = Date.now();
+  if (isUIButton(e.target) || e.touches.length !== 1) return;
+  if (beginDrag(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
+}, { passive: false });
 
-  window.addEventListener('touchend', endDrag);
-  window.addEventListener('touchcancel', endDrag);
-} else {
-  stageEl.addEventListener('mousedown', (e) => {
-    if (isUIButton(e.target)) return;
-    if (beginDrag(e.clientX, e.clientY)) e.preventDefault();
-  });
-  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-  window.addEventListener('mouseup', endDrag);
-}
+window.addEventListener('touchmove', (e) => {
+  lastTouchAt = Date.now();
+  if (!pointer.active) return;
+  const t = e.touches[0];
+  if (!t) return;
+  moveDrag(t.clientX, t.clientY);
+  e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchend', endDrag);
+window.addEventListener('touchcancel', endDrag);
+
+stageEl.addEventListener('mousedown', (e) => {
+  if (Date.now() - lastTouchAt < 900) return;   // 刚触摸过，忽略合成鼠标事件
+  if (isUIButton(e.target)) return;
+  if (beginDrag(e.clientX, e.clientY)) e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (Date.now() - lastTouchAt < 900) return;
+  moveDrag(e.clientX, e.clientY);
+});
+window.addEventListener('mouseup', () => { endDrag(); });
 
 // 屏蔽右键菜单与长按选择/缩放
 stageEl.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -2208,9 +2406,12 @@ document.getElementById('btnQuit').addEventListener('click', () => {
   screens.start.classList.remove('hidden');
 });
 // 兜底：标题页点任意位置都能开始（某些内置浏览器对 button 点击不灵）
-screens.start.addEventListener('click', () => { if (G.state === 'menu') startGame(); });
+screens.start.addEventListener('click', (e) => {
+  if (e.target && e.target.closest && e.target.closest('a')) return;   // 在线版链接照常跳转
+  if (G.state === 'menu') startGame();
+});
 screens.start.addEventListener('touchend', (e) => {
-  if (e.target.closest && e.target.closest('button')) return;
+  if (e.target.closest && (e.target.closest('button') || e.target.closest('a'))) return;
   if (G.state === 'menu') { e.preventDefault(); startGame(); }
 }, { passive: false });
 
